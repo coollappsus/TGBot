@@ -35,7 +35,7 @@ jobs:
 
   deploy:
     runs-on: self-hosted # Запускаем на раннере, который настроили до этого.
-    needs: test # Запускаем только если джоба prepare-environment прошла успешно
+    needs: test # Запускаем только если джоба test прошла успешно
     steps:
       - name: checkout repo
         uses: actions/checkout@v3
