@@ -2,6 +2,9 @@ services:
   app:
     image: my_telegram_chatgpt_bot
     container_name: ps-app
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
     depends_on:
       - postgresql
     networks:
