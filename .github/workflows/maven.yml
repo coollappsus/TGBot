@@ -38,6 +38,6 @@ jobs:
     needs: test # Запускаем только если джоба test прошла успешно
     steps:
       - name: checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: docker-compose
         run: docker compose up -d
