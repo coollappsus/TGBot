@@ -2,7 +2,7 @@ package com.example.tgbot.bot.command.handler;
 
 import com.example.tgbot.bot.command.TelegramCommandHandler;
 import com.example.tgbot.bot.command.TelegramCommands;
-import com.example.tgbot.bot.service.AccountService;
+import com.example.tgbot.bot.service.BalanceService;
 import com.example.tgbot.bot.service.SecureService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ public class AddMoneyCommandHandler implements TelegramCommandHandler {
     private static final String INCREASE_BALANCE_TEXT = "Баланс аккаунта %s увеличен на %s руб.";
 
     private final SecureService secureService;
-    private final AccountService accountService;
+    private final BalanceService balanceService;
 
     @Override
     public BotApiMethod<?> processCommand(Message update) {
@@ -29,12 +29,12 @@ public class AddMoneyCommandHandler implements TelegramCommandHandler {
                     .text(NOT_ENOUGH_PERMISSIONS_TEXT)
                     .build();
         }
-        String userName = getUserName(update.getText());
+        Long userId = Long.parseLong(getUserid(update.getText()));
         Double sum = getSum(update.getText());
-        accountService.increaseBalance(userName, sum);
+        balanceService.increaseBalance(userId, sum);
         return SendMessage.builder()
                 .chatId(update.getChatId())
-                .text(INCREASE_BALANCE_TEXT.formatted(userName, sum))
+                .text(INCREASE_BALANCE_TEXT.formatted(userId, sum))
                 .build();
     }
 
@@ -43,7 +43,7 @@ public class AddMoneyCommandHandler implements TelegramCommandHandler {
         return TelegramCommands.ADD_MONEY_COMMAND;
     }
 
-    private String getUserName(String text) {
+    private String getUserid(String text) {
         return text.split("[^/a-zA-Z\\d]+")[2];
     }
 

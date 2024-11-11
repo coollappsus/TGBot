@@ -3,9 +3,7 @@ package com.example.tgbot.bot.handler;
 import com.example.tgbot.bot.command.TelegramCommandsDispatcher;
 import com.example.tgbot.bot.model.Account;
 import com.example.tgbot.bot.service.AccountService;
-import com.example.tgbot.bot.service.openai.ChatGptService;
 import com.example.tgbot.bot.service.telegram.TelegramAsyncMessageSender;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,7 +23,6 @@ public class TelegramUpdateMessageHandler {
     private final TelegramTextHandler telegramTextHandler;
     private final TelegramVoiceHandler telegramVoiceHandler;
     private final AccountService accountService;
-    private final ChatGptService chatGptService;
 
     public BotApiMethod<?> handleMessage(Message message) {
         log.info("Начало обработки сообщения: message={}", message);
@@ -50,15 +47,10 @@ public class TelegramUpdateMessageHandler {
     }
 
     private SendMessage handleMessageAsync(Message message) {
-        Double balanceBeforeRequest = getTotalBalance();
-
         SendMessage result = message.hasVoice()
                 ? telegramVoiceHandler.processVoice(message)
                 : telegramTextHandler.processTextMessage(message);
         result.setParseMode(ParseMode.MARKDOWN);
-
-        Double balanceAfterRequest = getTotalBalance();
-        accountService.decreaseBalance(message.getFrom().getFirstName(), balanceBeforeRequest - balanceAfterRequest);
         return result;
     }
 
@@ -85,10 +77,4 @@ public class TelegramUpdateMessageHandler {
         }
         return account.getSubscribe().isActive();
     }
-
-    @Transactional
-    private Double getTotalBalance() {
-        return Double.parseDouble(chatGptService.getTotalBalance());
-    }
-
 }
