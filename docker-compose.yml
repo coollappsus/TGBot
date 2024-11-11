@@ -18,7 +18,7 @@ services:
       - POSTGRES_USER=my_user
       - POSTGRES_PASSWORD=my_password
     volumes:
-      - ./data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
     ports:
       - 5432:5432
     networks:
@@ -26,3 +26,6 @@ services:
 
 networks:
   my_network:
+
+volumes:
+  pg_data:
