@@ -22,9 +22,6 @@ public class TelegramAsyncMessageSender {
 
     public static final String WAIT_MESSAGE_TEXT = "Ваш запрос принят в обработку, ожидайте";
     private static final int TELEGRAM_SIZE_MESSAGE_LIMIT = 4096;
-    //TODO: временное решение, так как существуют проблемы с парсингом форматирования, если разбивать сообщение
-    // на несколько
-    private boolean isOverLimit;
 
     private final DefaultAbsSender defaultAbsSender;
     private final ExecutorService executorService = Executors.newFixedThreadPool(20);
@@ -48,18 +45,18 @@ public class TelegramAsyncMessageSender {
 
     private void sendMessagesInParts(String chatId, Message message, SendMessage sendMessage) {
         if (sendMessage.getText().length() > TELEGRAM_SIZE_MESSAGE_LIMIT) {
-            isOverLimit = true;
             for (int index = 0; index < sendMessage.getText().length(); index += TELEGRAM_SIZE_MESSAGE_LIMIT) {
                 if (index == 0) {
                     sendEditMessage(chatId, message.getMessageId(), sendMessage.getText().substring(index,
-                            Math.min(index + TELEGRAM_SIZE_MESSAGE_LIMIT, sendMessage.getText().length())));
+                            Math.min(index + TELEGRAM_SIZE_MESSAGE_LIMIT, sendMessage.getText().length())),
+                            true);
                 } else {
                     getAndSendMessage(chatId, sendMessage.getText().substring(index,
                             Math.min(index + TELEGRAM_SIZE_MESSAGE_LIMIT, sendMessage.getText().length())));
                 }
             }
         } else {
-            sendEditMessage(chatId, message.getMessageId(), sendMessage.getText());
+            sendEditMessage(chatId, message.getMessageId(), sendMessage.getText(), false);
         }
     }
 
@@ -75,14 +72,24 @@ public class TelegramAsyncMessageSender {
         }
     }
 
-    private void sendEditMessage(String chatId, int editMessageId, String newMessageText) {
+    /**
+     * Занимается отправкой сообщения, изменяя переданное
+     *
+     * @param chatId - чат, куда необходимо отправить сообщение
+     * @param editMessageId - сообщение, которое необходимо изменить
+     * @param newMessageText - новый текст сообщения
+     * @param isOverLimitSizeMessage - превышена ли длина сообщения. Временное решение, так как существуют проблемы
+     *                               с парсингом форматирования, если разбивать сообщение на несколько сообщений.
+     */
+    private void sendEditMessage(String chatId, int editMessageId, String newMessageText,
+                                 boolean isOverLimitSizeMessage) {
         try {
 //            List<MessageEntity> messageEntityList = List.of(MessageEntity.builder().type("pre").offset(0).length(10).language("java").build());
             defaultAbsSender.execute(EditMessageText.builder()
                     .chatId(chatId)
                     .messageId(editMessageId)
                     .text(newMessageText)
-                    .parseMode(isOverLimit
+                    .parseMode(isOverLimitSizeMessage
                             ? null
                             : ParseMode.MARKDOWN)
 //                    .entities(messageEntityList)
