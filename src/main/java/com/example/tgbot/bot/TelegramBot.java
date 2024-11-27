@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -32,6 +33,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             var method = processUpdate(update);
             if (method != null ) {
+                sendTypingIndicator(update.getMessage().getChatId());
                 sendApiMethod(method);
             }
         } catch (Exception e) {
@@ -49,6 +51,24 @@ public class TelegramBot extends TelegramLongPollingBot {
                 ? telegramUpdateMessageHandler.handleMessage(update.getMessage())
                 : null;
     }
+
+    public void sendTypingIndicator(long chatId) {
+        SendChatAction action = SendChatAction.builder()
+                .chatId(chatId)
+                .action("typing")
+                .build();
+        try {
+            execute(action);
+        } catch (Exception e) {
+            log.error("Error while processing update", e);
+            try {
+                sendUserErrorMessage(chatId);
+            } catch (TelegramApiException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+
 
     private void sendUserErrorMessage(Long userId) throws TelegramApiException {
         sendApiMethod(SendMessage.builder()
