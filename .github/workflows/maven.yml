@@ -41,4 +41,4 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v4
       - name: docker-compose
-        run: docker compose up -d
+        run: docker compose up -d --remove-orphans
