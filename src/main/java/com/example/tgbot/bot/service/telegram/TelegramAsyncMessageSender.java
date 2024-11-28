@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
-import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -35,7 +34,7 @@ public class TelegramAsyncMessageSender {
                                  Function<Throwable, SendMessage> onErrorHandler) {
         log.info("Ассинхронная отправка сообщения ожидания: chatId={}", chatId);
         var message = getAndSendMessage(chatId, WAIT_MESSAGE_TEXT);
-        sendTypingIndicator(Long.parseLong(chatId));
+//        sendTypingIndicator(Long.parseLong(chatId));
 
         CompletableFuture.supplyAsync(action, executorService)
                 .exceptionally(onErrorHandler)
@@ -107,15 +106,16 @@ public class TelegramAsyncMessageSender {
      *
      * @param chatId - чат, куда необходимо отправить сообщение
      */
-    public void sendTypingIndicator(long chatId) {
-        try {
-            defaultAbsSender.execute(SendChatAction.builder()
-                    .chatId(chatId)
-                    .action("typing")
-                    .build());
-        } catch (TelegramApiException ex) {
-            log.error("Ошибка отправки статуса печати ответа клиенту с chatId=" + chatId, ex);
-            throw new RuntimeException(ex);
-        }
-    }
+    //TODO: заколочено, т.к. пока не работает
+//    public void sendTypingIndicator(long chatId) {
+//        try {
+//            defaultAbsSender.execute(SendChatAction.builder()
+//                    .chatId(chatId)
+//                    .action("typing")
+//                    .build());
+//        } catch (TelegramApiException ex) {
+//            log.error("Ошибка отправки статуса печати ответа клиенту с chatId=" + chatId, ex);
+//            throw new RuntimeException(ex);
+//        }
+//    }
 }
