@@ -68,7 +68,7 @@ public class TelegramAsyncMessageSender {
                     .chatId(chatId)
                     .build());
         } catch (TelegramApiException e) {
-            log.error("Ошибка отправки ответа клиенту с chatId=" + chatId, e);
+            log.error(String.format("Ошибка отправки ответа клиенту с chatId=%s, message=%s", chatId, message), e);
             throw new RuntimeException(e);
         }
     }
@@ -96,7 +96,7 @@ public class TelegramAsyncMessageSender {
 //                    .entities(messageEntityList)
                     .build());
         } catch (TelegramApiException e) {
-            log.error("Ошибка отправки ответа клиенту с chatId=" + chatId, e);
+            log.error(String.format("Ошибка отправки ответа клиенту с chatId=%s, message=%s", chatId, newMessageText), e);
             throw new RuntimeException(e);
         }
     }
