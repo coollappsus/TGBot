@@ -43,6 +43,6 @@ jobs:
       - name: docker-compose down
         run: docker compose down
       - name: docker-compose pull
-        run: docker-compose pull
+        run: docker compose pull
       - name: docker-compose up
         run: docker compose up -d
