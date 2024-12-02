@@ -27,7 +27,7 @@ public class GetLastContactInfoCommandHandler implements TelegramCommandHandler 
                     .text(NOT_ENOUGH_PERMISSIONS_TEXT)
                     .build();
         }
-        int countContacts = Integer.getInteger(getCountContacts(update.getText()));
+        int countContacts = Integer.parseInt(getCountContacts(update.getText()));
         String result = accountService.getAccountsInfoByLimit(countContacts);
         return SendMessage.builder()
                 .chatId(update.getChatId())
