@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -22,6 +23,8 @@ public class TelegramAsyncMessageSender {
 
     public static final String WAIT_MESSAGE_TEXT = "Ваш запрос принят в обработку, ожидайте";
     private static final int TELEGRAM_SIZE_MESSAGE_LIMIT = 4096;
+    public static final String BAD_REQUEST_TEXT_EX = "[400] Bad Request: can't parse entities: Can't find end of the " +
+            "entity starting at byte offset";
 
     private final DefaultAbsSender defaultAbsSender;
     private final ExecutorService executorService = Executors.newFixedThreadPool(20);
@@ -34,7 +37,7 @@ public class TelegramAsyncMessageSender {
                                  Function<Throwable, SendMessage> onErrorHandler) {
         log.info("Асинхронная отправка сообщения ожидания: chatId={}", chatId);
         var message = getAndSendMessage(chatId, WAIT_MESSAGE_TEXT);
-//        sendTypingIndicator(Long.parseLong(chatId));
+        sendTypingIndicator(Long.parseLong(chatId));
 
         CompletableFuture.supplyAsync(action, executorService)
                 .exceptionally(onErrorHandler)
@@ -96,6 +99,18 @@ public class TelegramAsyncMessageSender {
 //                    .entities(messageEntityList)
                     .build());
         } catch (TelegramApiException e) {
+            if (e.getMessage().contains(BAD_REQUEST_TEXT_EX)) {
+                try {
+                    defaultAbsSender.execute(EditMessageText.builder()
+                            .chatId(chatId)
+                            .messageId(editMessageId)
+                            .text(newMessageText)
+                            .build());
+                } catch (TelegramApiException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+
             log.error(String.format("Ошибка отправки ответа клиенту с chatId=%s, message=%s", chatId, newMessageText), e);
             throw new RuntimeException(e);
         }
@@ -107,15 +122,15 @@ public class TelegramAsyncMessageSender {
      * @param chatId - чат, куда необходимо отправить сообщение
      */
     //TODO: заколочено, т.к. пока не работает
-//    public void sendTypingIndicator(long chatId) {
-//        try {
-//            defaultAbsSender.execute(SendChatAction.builder()
-//                    .chatId(chatId)
-//                    .action("typing")
-//                    .build());
-//        } catch (TelegramApiException ex) {
-//            log.error("Ошибка отправки статуса печати ответа клиенту с chatId=" + chatId, ex);
-//            throw new RuntimeException(ex);
-//        }
-//    }
+    public void sendTypingIndicator(long chatId) {
+        try {
+            defaultAbsSender.execute(SendChatAction.builder()
+                    .chatId(chatId)
+                    .action("typing")
+                    .build());
+        } catch (TelegramApiException ex) {
+            log.error("Ошибка отправки статуса печати ответа клиенту с chatId=" + chatId, ex);
+            throw new RuntimeException(ex);
+        }
+    }
 }
