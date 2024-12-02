@@ -42,12 +42,12 @@ public class AccountService {
 
     public String getAccountsInfoByLimit(int limit) {
         List<Account> accounts = accountRepository.findAllByOrderByIdDesc(Limit.of(limit));
-        StringBuilder sb = new StringBuilder("Информация о последних контактах(").append(accounts.size())
+        StringBuilder sb = new StringBuilder("Информация о последних аккаунтах(").append(accounts.size())
                 .append(" шт)");
         for (int i = 0; i < accounts.size(); i++) {
             Account acc = accounts.get(i);
-            sb.append("\n").append(i).append(". ").append(acc.getUserName()).append(", ").append(acc.getUserId())
-                    .append(", ").append(acc.getBalance()).append(" руб., ");
+            sb.append("\n").append(i + 1).append(". ").append(acc.getUserName()).append(", ").append(acc.getUserId())
+                    .append(", ").append(acc.getBalance()).append(" руб.");
         }
         return sb.toString();
     }
