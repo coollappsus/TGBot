@@ -6,9 +6,11 @@ import com.example.tgbot.bot.model.Subscribe;
 import com.example.tgbot.bot.repository.AccountRepository;
 import com.example.tgbot.bot.repository.RoleRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.User;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.example.tgbot.bot.model.Roles.USER_ROLE_ID;
@@ -36,5 +38,17 @@ public class AccountService {
 
     public Account findByUserId(Long userId) {
         return accountRepository.findByUserId(userId);
+    }
+
+    public String getAccountsInfoByLimit(int limit) {
+        List<Account> accounts = accountRepository.findAllByOrderByIdDesc(Limit.of(limit));
+        StringBuilder sb = new StringBuilder("Информация о последних контактах(").append(accounts.size())
+                .append(" шт)");
+        for (int i = 0; i < accounts.size(); i++) {
+            Account acc = accounts.get(i);
+            sb.append("\n").append(i).append(". ").append(acc.getUserName()).append(", ").append(acc.getUserId())
+                    .append(", ").append(acc.getBalance()).append(" руб., ");
+        }
+        return sb.toString();
     }
 }

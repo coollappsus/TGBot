@@ -32,14 +32,14 @@ public class TelegramAsyncMessageSender {
 
     public void sendMessageAsync(String chatId, Supplier<SendMessage> action,
                                  Function<Throwable, SendMessage> onErrorHandler) {
-        log.info("Ассинхронная отправка сообщения ожидания: chatId={}", chatId);
+        log.info("Асинхронная отправка сообщения ожидания: chatId={}", chatId);
         var message = getAndSendMessage(chatId, WAIT_MESSAGE_TEXT);
 //        sendTypingIndicator(Long.parseLong(chatId));
 
         CompletableFuture.supplyAsync(action, executorService)
                 .exceptionally(onErrorHandler)
                 .thenAccept(sendMessage -> {
-                    log.info("Ассинхронная отправка сообщения результата: chatId={}", chatId);
+                    log.info("Асинхронная отправка сообщения результата: chatId={}", chatId);
                     sendMessagesInParts(chatId, message, sendMessage);
                 });
     }
