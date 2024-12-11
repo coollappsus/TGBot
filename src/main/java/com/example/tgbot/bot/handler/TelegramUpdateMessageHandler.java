@@ -4,6 +4,7 @@ import com.example.tgbot.bot.command.TelegramCommandsDispatcher;
 import com.example.tgbot.bot.model.Account;
 import com.example.tgbot.bot.service.AccountService;
 import com.example.tgbot.bot.service.telegram.TelegramAsyncMessageSender;
+import com.example.tgbot.bot.service.telegram.TelegramAsyncTypingIndicatorSender;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class TelegramUpdateMessageHandler {
     private final TelegramTextHandler telegramTextHandler;
     private final TelegramVoiceHandler telegramVoiceHandler;
     private final AccountService accountService;
+    private final TelegramAsyncTypingIndicatorSender typingIndicatorSender;
 
     public BotApiMethod<?> handleMessage(Message message) {
         log.info("Начало обработки сообщения: message={}", message);
@@ -32,8 +34,8 @@ public class TelegramUpdateMessageHandler {
 
         var chatId = message.getChatId().toString();
         if (!hasActiveSubscribe(message.getFrom())) {
-            return getErrorMessage("На балансе недостаточно средств для совершения запроса или не пройден " +
-                    "процесс регистрации", chatId);
+            return getErrorMessage(new Throwable("На балансе недостаточно средств для совершения запроса или " +
+                    "не пройден процесс регистрации"), chatId);
         }
 
         if (message.hasVoice() || message.hasText()) {
@@ -47,26 +49,21 @@ public class TelegramUpdateMessageHandler {
     }
 
     private SendMessage handleMessageAsync(Message message) {
+        typingIndicatorSender.start(message.getChatId());
         SendMessage result = message.hasVoice()
                 ? telegramVoiceHandler.processVoice(message)
                 : telegramTextHandler.processTextMessage(message);
         result.setParseMode(ParseMode.MARKDOWN);
+        typingIndicatorSender.stop();
         return result;
     }
 
     private SendMessage getErrorMessage(Throwable throwable, String chatId) {
+        typingIndicatorSender.stop();
         log.error("Произошла ошибка, chatId={}", chatId, throwable);
         return SendMessage.builder()
                 .chatId(chatId)
                 .text("Произошла ошибка, попробуйте позже")
-                .build();
-    }
-
-    private SendMessage getErrorMessage(String text, String chatId) {
-        log.error(text + ", chatId={}", chatId);
-        return SendMessage.builder()
-                .chatId(chatId)
-                .text(text)
                 .build();
     }
 

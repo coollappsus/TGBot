@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
-import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -37,7 +36,6 @@ public class TelegramAsyncMessageSender {
                                  Function<Throwable, SendMessage> onErrorHandler) {
         log.info("Асинхронная отправка сообщения ожидания: chatId={}", chatId);
         var message = getAndSendMessage(chatId, WAIT_MESSAGE_TEXT);
-        sendTypingIndicator(Long.parseLong(chatId));
 
         CompletableFuture.supplyAsync(action, executorService)
                 .exceptionally(onErrorHandler)
@@ -113,24 +111,6 @@ public class TelegramAsyncMessageSender {
 
             log.error(String.format("Ошибка отправки ответа клиенту с chatId=%s, message=%s", chatId, newMessageText), e);
             throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Занимается отправкой статуса печати
-     *
-     * @param chatId - чат, куда необходимо отправить сообщение
-     */
-    //TODO: заколочено, т.к. пока не работает
-    public void sendTypingIndicator(long chatId) {
-        try {
-            defaultAbsSender.execute(SendChatAction.builder()
-                    .chatId(chatId)
-                    .action("typing")
-                    .build());
-        } catch (TelegramApiException ex) {
-            log.error("Ошибка отправки статуса печати ответа клиенту с chatId=" + chatId, ex);
-            throw new RuntimeException(ex);
         }
     }
 }
