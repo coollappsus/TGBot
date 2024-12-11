@@ -34,7 +34,7 @@ public class TelegramAsyncTypingIndicatorSender {
                 sendTypingIndicator(chatId);
 
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(6000);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
