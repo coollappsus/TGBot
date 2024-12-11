@@ -1,6 +1,7 @@
 package com.example.tgbot.bot.service.telegram;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
@@ -21,7 +22,7 @@ public class TelegramAsyncTypingIndicatorSender {
     private final DefaultAbsSender defaultAbsSender;
     private CompletableFuture<Void> future;
 
-    public TelegramAsyncTypingIndicatorSender(DefaultAbsSender defaultAbsSender) {
+    public TelegramAsyncTypingIndicatorSender(@Lazy DefaultAbsSender defaultAbsSender) {
         this.defaultAbsSender = defaultAbsSender;
         this.running = new AtomicBoolean(false);
     }
