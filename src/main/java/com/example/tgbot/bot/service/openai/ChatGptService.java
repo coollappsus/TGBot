@@ -12,7 +12,8 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class ChatGptService {
 
-    private static final String CHAT_GPT_MODEL = "gpt-4o-mini";
+//    private static final String CHAT_GPT_MODEL = "gpt-4o-mini";
+    private static final String CHAT_GPT_MODEL = "o4-mini";
     private static final String CHAT_GPT_ROLE = "user";
 
 
