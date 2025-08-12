@@ -10,6 +10,20 @@ services:
     networks:
       - my_network
 
+  postgresql:
+    image: postgres:14-alpine
+    container_name: my_postgres
+    environment:
+      - POSTGRES_DB=my_database
+      - POSTGRES_USER=my_user
+      - POSTGRES_PASSWORD=my_password
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - my_network
+
 networks:
   my_network:
     external: true
