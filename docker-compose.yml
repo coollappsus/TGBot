@@ -2,6 +2,7 @@ services:
   app:
     image: my_telegram_chatgpt_bot
     container_name: ps-app
+    restart: unless-stopped
     build:
       context: ./
       dockerfile: ./Dockerfile
@@ -13,6 +14,7 @@ services:
   postgresql:
     image: postgres:14-alpine
     container_name: my_postgres
+    restart: unless-stopped
     environment:
       - POSTGRES_DB=my_database
       - POSTGRES_USER=my_user
