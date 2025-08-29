@@ -80,7 +80,7 @@ jobs:
         run: docker compose up -d --build --pull always --force-recreate
 
       - name: Connect app to shared_db_net
-        run:
+        run: |
             # Определяем id запущенного контейнера сервиса "app"
             CONTAINER_ID=$(docker compose ps -q app)
             
