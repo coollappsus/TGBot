@@ -6,6 +6,11 @@ services:
     build:
       context: ./
       dockerfile: ./Dockerfile
+    env_file:
+      - .env
+    # Монтируем сгенерённый файл свойств внутрь контейнера
+    volumes:
+      - ./application.properties:/config/application.properties:ro
     depends_on:
       - postgresql
     networks:
@@ -15,10 +20,8 @@ services:
     image: postgres:14-alpine
     container_name: my_postgres
     restart: unless-stopped
-    environment:
-      - POSTGRES_DB=my_database
-      - POSTGRES_USER=my_user
-      - POSTGRES_PASSWORD=my_password
+    env_file:
+      - .env
     volumes:
       - pg_data:/var/lib/postgresql/data
     ports:

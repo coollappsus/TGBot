@@ -35,11 +35,46 @@ jobs:
       - run: echo 'Тут будут тесты прогонятся, когда эти тесты завезут :) '
 
   deploy:
+    name: Deploy to production via Docker Compose
     runs-on: self-hosted # Запускаем на раннере, который настроили до этого.
     needs: test # Запускаем только если джоба test прошла успешно
+    env: # Пробрасываем секреты в среду шага deploy
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      DB_URL: ${{ secrets.DB_URL }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      OPEN_AI_TOKEN: ${{ secrets.OPEN_AI_TOKEN }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      # Генерируем .env
+      - name: Generate .env file
+        run: |
+          cat <<EOF > .env
+          BOT_TOKEN=${BOT_TOKEN}
+          DB_URL=${DB_URL}
+          DB_USERNAME=${DB_USERNAME}
+          DB_PASSWORD=${DB_PASSWORD}
+          OPEN_AI_TOKEN=${OPEN_AI_TOKEN}
+          POSTGRES_DB=${POSTGRES_DB}
+          POSTGRES_USER=${DB_USERNAME}
+          POSTGRES_PASSWORD=${DB_PASSWORD}
+          EOF
+
+      # Рендерим application.tpl.tpl из шаблона
+      - name: Render application.tpl.tpl
+        run: |
+          envsubst < application.properties.tpl > application.properties
+
+      - name: Cleanup Docker
+        run: |
+          docker builder prune --all --force
+          docker image prune --all --force
+          docker container prune --force
+          docker volume prune --force
 
       - name: Build & deploy via docker-compose
         run: docker compose up -d --build --pull always --force-recreate
