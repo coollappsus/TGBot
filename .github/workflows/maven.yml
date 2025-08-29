@@ -64,8 +64,8 @@ jobs:
           POSTGRES_PASSWORD=${DB_PASSWORD}
           EOF
 
-      # Рендерим application.tpl.tpl из шаблона
-      - name: Render application.tpl.tpl
+      # Рендерим application.properties.tpl из шаблона
+      - name: Render application.properties.tpl
         run: |
           envsubst < application.properties.tpl > application.properties
 
