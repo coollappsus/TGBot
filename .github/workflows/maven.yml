@@ -83,9 +83,11 @@ jobs:
         run: |
             # Определяем id запущенного контейнера сервиса "app"
             CONTAINER_ID=$(docker compose ps -q app)
+            CONTAINER_DB_ID=$(docker compose ps -q postgresql)
             
             # Создаём сеть, если её нет
             docker network create shared_db_net || true
             
             # Подключаем контейнер к сети с alias=db
             docker network connect --alias db shared_db_net $CONTAINER_ID
+            docker network connect --alias db shared_db_net $CONTAINER_DB_ID
